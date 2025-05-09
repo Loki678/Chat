@@ -174,7 +174,7 @@
         }
     
         socket.onmessage = (event) => {
-            const messageElement = createMessageElement('bot', event.data);
+            const messageElement = createMessageElement(event.data);
             messagesContainer.appendChild(messageElement);
             scrollToBottom();
         };
@@ -196,7 +196,7 @@
             return messageElement;
         }
     
-        function scrollToBottom() {
+        function scrollToBotto() {
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
         }
     </script>

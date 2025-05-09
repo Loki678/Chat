@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced Chatbox</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #eef2f3;
+        }
+
+        .chatbox {
+            background-color: #ffffff;
+            width: 100%;
+            max-width: 800px;
+            height: 90vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .chat-header {
+            background: #000000;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-size: 24px;
+            position: relative;
+        }
+
+        .chat-header .status {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 14px;
+            background: #20d74b;
+            padding: 5px 10px;
+            border-radius: 15px;
+            color: white;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: #fefefe;
+        }
+
+        .chat-messages .message {
+            margin-bottom: 15px;
+        }
+
+        .chat-messages .message.user {
+            text-align: right;
+        }
+
+        .chat-messages .message .content {
+            display: inline-block;
+            padding: 10px 15px;
+            border-radius: 12px;
+            font-size: 14px;
+            max-width: 70%;
+            word-wrap: break-word;
+        }
+
+        .chat-messages .message.bot .content {
+            background: #e9ecef;
+        }
+
+        .chat-messages .message.user .content {
+            background: #000000;
+            color: white;
+        }
+
+        .chat-messages .timestamp {
+            font-size: 12px;
+            color: #6c757d;
+            margin-top: 5px;
+        }
+
+        .chat-input {
+            display: flex;
+            padding: 10px;
+            border-top: 1px solid #dee2e6;
+            background: white;
+        }
+
+        .chat-input input[type="text"] {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ced4da;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .chat-input button {
+            background: #000000;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin-left: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .chat-input button:hover {
+            background: #000000;
+        }
+
+        .typing-indicator {
+            font-style: italic;
+            font-size: 14px;
+            color: #6c757d;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="chatbox">
+        <div class="chat-header">
+            <b><i>Just Chatbox</i></b>
+            <span class="status"><a href="C:\Users\Lohith MH\OneDrive\Desktop\Project\Chat application\Untitled-1.html">Connected</a></span>
+        </div>
+        <div id="chat-messages" class="chat-messages"></div>
+        <div id="typing-indicator" class="typing-indicator" style="display: none;">The bot is typing...</div>
+        <div class="chat-input">
+            <input id="chat-input" type="text" placeholder="Just message here...">
+            <button id="send-button">Send</button>
+        </div>
+    </div>
+
+    <script>
+        const socket = new WebSocket('ws://localhost:8080'); // 'ws' instead of 'wss' for local use
+    
+        const messagesContainer = document.getElementById('chat-messages');
+        const inputElement = document.getElementById('chat-input');
+        const sendButton = document.getElementById('send-button');
+        const statusIndicator = document.querySelector('.status');
+    
+        socket.onopen = () => {
+            statusIndicator.textContent = 'Connected';
+            statusIndicator.style.backgroundColor = '#28a745';
+        };
+    
+        socket.onclose = () => {
+            statusIndicator.textContent = 'Disconnected';
+            statusIndicator.style.backgroundColor = '#dc3545';
+        };
+    
+        sendButton.addEventListener('click', sendMessage);
+        inputElement.addEventListener('keypress', (event) => {
+            if (event.key === 'Enter') sendMessage();
+        });
+    
+        function sendMessage() {
+            const messageText = inputElement.value.trim();
+            if (messageText) {
+                socket.send(messageText);
+                const messageElement = createMessageElement('user', messageText);
+                messagesContainer.appendChild(messageElement);
+                inputElement.value = '';
+                scrollToBottom();
+            }
+        }
+    
+        socket.onmessage = (event) => {
+            const messageElement = createMessageElement('bot', event.data);
+            messagesContainer.appendChild(messageElement);
+            scrollToBottom();
+        };
+    
+        function createMessageElement(sender, text) {
+            const messageElement = document.createElement('div');
+            messageElement.className = `message ${sender}`;
+    
+            const contentElement = document.createElement('div');
+            contentElement.className = 'content';
+            contentElement.textContent = text;
+    
+            const timestampElement = document.createElement('div');
+            timestampElement.className = 'timestamp';
+            timestampElement.textContent = new Date().toLocaleTimeString();
+    
+            messageElement.appendChild(contentElement);
+            messageElement.appendChild(timestampElement);
+            return messageElement;
+        }
+    
+        function scrollToBottom() {
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+    </script>
+    
+</body>
+</html>
